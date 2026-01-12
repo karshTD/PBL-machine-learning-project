@@ -1,0 +1,6 @@
+﻿age,monthly_income,loan_amount,interest_rate,tenure_years,monthly_emi,dependents,credit_score,employment_type,stress_level
+24,25000,300000,12.5,5,6750,0,650,salaried,High
+32,60000,800000,10.8,7,13500,2,720,salaried,Medium
+45,120000,1500000,9.2,10,19000,3,780,business,Low
+28,40000,500000,13.1,4,13500,1,690,salaried,High
+38,85000,900000,11,6,17500,2,740,business,Medium
