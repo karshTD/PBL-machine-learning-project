@@ -1,3 +1,6 @@
+```mermaid
+
+
 graph TD
     %% Styling
     classDef frontend fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
@@ -82,3 +85,5 @@ graph TD
     Flask -. "Checks status" .-> Redis
     Redis -- "15. Returns final Risk Report" --> Flask
     Flask -- "16. Displays to User" --> React
+
+```
