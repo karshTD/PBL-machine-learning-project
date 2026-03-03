@@ -1,8 +1,6 @@
 from celery import Celery
 import os
-import time
 
-# --- Celery Configuration ---
 BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
 RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
@@ -10,33 +8,43 @@ celery = Celery("tasks", broker=BROKER_URL, backend=RESULT_BACKEND)
 
 
 @celery.task(name="tasks.process_document")
-def process_document(filename: str) -> dict:
-    """
-    Dummy task that simulates document processing.
-    Later, this will call: Parser → LangChain Chunker → Embedder → Agents
-    """
-    print(f"[Worker] Starting to process: {filename}")
+def process_document(filepath: str) -> dict:
 
-    # Simulate Stage 1: Parsing (Layer 4 will replace this)
-    time.sleep(2)
-    print(f"[Worker] Stage 1 complete: Text extracted from {filename}")
+    filename = os.path.basename(filepath)
+    print(f"[Worker] Starting: {filename}")
 
-    # Simulate Stage 2: Chunking + Embedding (Layer 4 + 5 will replace this)
-    time.sleep(2)
-    print(f"[Worker] Stage 2 complete: Document chunked and embedded")
+    # ── Stage 1: Parse PDF ─────────────────────────────────────────
+    from unstructured.partition.pdf import partition_pdf
 
-    # Simulate Stage 3: AI Analysis (Layer 7 will replace this)
-    time.sleep(2)
-    print(f"[Worker] Stage 3 complete: Risk analysis done")
+    elements = partition_pdf(filepath)
+    raw_text = "\n".join([str(el) for el in elements])
+    print(f"[Worker] Parsed {len(elements)} elements from PDF")
 
-    # Dummy result — later this will be the real JSON risk report
+    # ── Stage 2: Chunk with LangChain ──────────────────────────────
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50,
+        separators=["\n\n", "\n", ".", " "]
+    )
+    chunks = splitter.split_text(raw_text)
+    print(f"[Worker] Split into {len(chunks)} chunks")
+
+    # ── Stage 3: Embed with HuggingFace ────────────────────────────
+    from sentence_transformers import SentenceTransformer
+
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings = model.encode(chunks, show_progress_bar=False)
+    print(f"[Worker] Generated {len(embeddings)} embeddings")
+
+    # ── Return result (Layer 5 will store these in vector DB) ───────
     return {
         "filename": filename,
-        "status": "analyzed",
-        "risk_score": 7.4,
-        "flagged_clauses": [
-            {"clause": "Section 4.2 - Penalty clause", "risk": "HIGH"},
-            {"clause": "Section 7.1 - Auto-renewal", "risk": "MEDIUM"},
-        ],
-        "summary": "This is a dummy result. Real AI analysis coming in Layer 7."
+        "status": "parsed_and_embedded",
+        "total_elements": len(elements),
+        "total_chunks": len(chunks),
+        "embedding_shape": list(embeddings.shape),
+        "sample_chunk": chunks[0] if chunks else "",
+        "message": "Ready for RAG. Vector storage coming in Layer 5."
     }
