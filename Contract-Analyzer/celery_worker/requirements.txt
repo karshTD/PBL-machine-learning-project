@@ -1,2 +1,0 @@
-celery==5.4.0      # The actual task queue worker
-redis==5.0.7       # So Celery can connect to Redis as its broker
