@@ -8,3 +8,6 @@ torch --index-url https://download.pytorch.org/whl/cpu
 numpy==1.26.4
 pillow==10.2.0
 python-magic==0.4.27
+faiss-cpu==1.8.0
+pandas==2.2.0
+pyarrow==16.0.0
