@@ -1,0 +1,4 @@
+flask==3.0.3       # The web framework — handles HTTP routes (/upload, /status)
+celery==5.4.0      # Lets Flask send tasks to the queue
+redis==5.0.7       # Python client to talk to the Redis server
+flask-cors

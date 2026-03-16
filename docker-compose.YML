@@ -1,0 +1,50 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  flask:
+    build: ./flask_app
+    ports:
+      - "5000:5000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./flask_app:/app
+      - ./uploads:/uploads
+
+  celery_worker:
+    build: ./celery_worker
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MCP_SERVER_URL=http://mcp_server:6000
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mcp_server:
+        condition: service_started
+    volumes:
+      - ./celery_worker:/app
+      - ./uploads:/uploads
+      - ./data:/data
+
+  mcp_server:
+    build: ./mcp_server
+    ports:
+      - "6000:6000"
+    volumes:
+      - ./mcp_server:/app
