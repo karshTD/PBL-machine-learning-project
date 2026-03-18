@@ -6,8 +6,8 @@ import pickle
 from sentence_transformers import SentenceTransformer
 
 CSV_PATH = "/data/complaints.csv"
-FAISS_INDEX_PATH = "/app/faiss_index.bin"
-FAISS_METADATA_PATH = "/app/faiss_metadata.pkl"
+FAISS_INDEX_PATH = "/app/faiss_data/faiss_index.bin"
+FAISS_METADATA_PATH = "/app/faiss_data/faiss_metadata.pkl"
 MAX_ROWS = 50000
 BATCH_SIZE = 500
 MODEL_NAME = "all-MiniLM-L6-v2"
@@ -48,6 +48,7 @@ def run_ingestion():
     dimension = all_embeddings.shape[1]
     index = faiss.IndexFlatL2(dimension)
     index.add(all_embeddings)
+    os.makedirs("/app/faiss_data", exist_ok=True)
     faiss.write_index(index, FAISS_INDEX_PATH)
 
     metadata = [
