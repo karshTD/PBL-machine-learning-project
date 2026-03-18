@@ -41,6 +41,7 @@ services:
       - ./celery_worker:/app
       - ./uploads:/uploads
       - ./data:/data
+      - ./faiss_data:/app/faiss_data
 
   mcp_server:
     build: ./mcp_server

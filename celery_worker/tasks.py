@@ -10,8 +10,8 @@ celery = Celery("tasks", broker=BROKER_URL, backend=RESULT_BACKEND)
 def load_rag():
     import faiss
     import pickle
-    index_path = "/app/faiss_index.bin"
-    metadata_path = "/app/faiss_metadata.pkl"
+    index_path = "/app/faiss_data/faiss_index.bin"
+    metadata_path = "/app/faiss_data/faiss_metadata.pkl"
     if os.path.exists(index_path) and os.path.exists(metadata_path):
         index = faiss.read_index(index_path)
         with open(metadata_path, "rb") as f:
